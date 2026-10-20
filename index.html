@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Jakin’s Podcast · 게스트 사전 설문 / Guest Pre-Interview</title>
+<style>
+:root{--bg:#F3F0E8;--card:#FBF9F4;--ink:#1D2B25;--mute:#5E6B64;--green:#1F4A3A;--line:#D8D3C4;--gold:#A4863D;--on:#FBF9F4}
+@media (prefers-color-scheme:dark){:root{color-scheme:dark;--bg:#16261F;--card:#1D3128;--ink:#ECE8DC;--mute:#A5B1A9;--green:#6FA88F;--line:#2F473B;--on:#10201A}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 "Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif}
+main{max-width:760px;margin:0 auto;padding:28px 18px 64px}
+.eyebrow{color:var(--gold);letter-spacing:.14em;font-size:12px;text-transform:uppercase;margin-top:20px}
+h1{font:600 30px/1.3 "Noto Serif KR",Georgia,serif;margin:6px 0 4px;color:var(--green)}
+h2{font:600 21px/1.35 "Noto Serif KR",Georgia,serif;margin:0 0 4px;color:var(--green)}
+.sub,.en{color:var(--mute);font-size:14px}
+.en{display:block}
+section{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:22px;margin:20px 0}
+ol.flow{padding-left:20px;margin:12px 0 0}ol.flow li{margin:10px 0}
+.terms{max-height:300px;overflow-y:auto;border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin:14px 0;font-size:14.5px;background:var(--bg)}
+.terms p{margin:0 0 12px}
+label{display:block;font-weight:600;margin:16px 0 4px}
+input[type=text],input[type=email],textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+textarea{min-height:84px;resize:vertical}
+input:focus,textarea:focus{outline:2px solid var(--gold);outline-offset:1px}
+.chk{display:flex;gap:10px;align-items:flex-start;font-weight:500}
+.chk input{margin-top:6px;accent-color:var(--green);width:18px;height:18px;flex:none}
+button{font:inherit;font-weight:600;border-radius:8px;padding:11px 20px;border:1px solid var(--green);background:var(--green);color:var(--on);cursor:pointer}
+button.ghost{background:transparent;color:var(--green)}
+button:disabled{opacity:.4;cursor:not-allowed}
+.row{display:flex;gap:8px;margin:8px 0}.row input{flex:1}
+.locked{opacity:.45;pointer-events:none;filter:grayscale(.4)}
+.hidden{display:none}
+.err{color:#B0452F;font-size:14px;min-height:20px;margin-top:8px}
+.box{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:16px;margin:22px 0 0}
+.mono{font-family:ui-monospace,Menlo,monospace;font-size:12px}
+</style>
+</head>
+<body>
+<main>
+<div class="eyebrow">Jakin’s Podcast</div>
+<h1>게스트 사전 설문<span class="en" style="font-weight:400;font-family:inherit">Guest Pre-Interview Survey</span></h1>
+<div id="welcome" style="font-weight:600;color:var(--green)"></div>
+<div class="sub">출연을 수락해 주셔서 감사합니다. 가이드를 읽고, 약관에 동의한 뒤 설문을 작성해 주세요. / Thank you for joining us. Please read the guide, accept the terms, then complete the survey.</div>
+<div class="err" id="linkErr"></div>
+
+<section id="guide">
+  <h2>1. 인터뷰 가이드 <span class="en">Interview Guideline</span></h2>
+  <p class="sub">에피소드는 매주 화요일에 공개됩니다. 주제: 창업, 비즈니스, 심리, 종교, 철학, 정치.<span class="en">Episodes go live every Tuesday. Topics: startups, business, psychology, religion, philosophy, politics.</span></p>
+  <ol class="flow" id="flow"></ol>
+  <p class="sub" style="margin-top:14px">편하게 대화하는 분위기입니다. 답하기 어려운 질문은 언제든 건너뛸 수 있습니다. / The tone is relaxed. You can skip any question at any time.</p>
+</section>
+
+<section id="termsBox">
+  <h2>2. 이용 약관 및 동의 <span class="en">Terms &amp; Conditions</span></h2>
+  <div class="terms" id="terms" tabindex="0"></div>
+  <label class="chk"><input type="checkbox" id="agree"><span>위 약관을 모두 읽었으며 동의합니다.<span class="en">I have read and agree to the terms above.</span></span></label>
+  <div style="margin-top:12px"><button id="goBtn" disabled>동의하고 설문 시작 / Agree &amp; Start</button></div>
+</section>
+
+<section id="survey" class="locked">
+  <h2>3. 설문 <span class="en">Survey</span></h2>
+  <div class="sub" id="lockNote">약관에 동의하면 열립니다. / Unlocks after you accept the terms.</div>
+  <label for="name">성함 / Full name *</label><input type="text" id="name" autocomplete="name">
+  <label for="email">이메일 / Email *</label><input type="email" id="email" autocomplete="email">
+  <label for="bio">간단한 소개 / Short bio</label><textarea id="bio"></textarea>
+  <label for="links">웹사이트·SNS 링크 / Website or social links</label><input type="text" id="links">
+  <label for="topic">오늘 꼭 다루고 싶은 핵심 주제 / The main topic you’d like to cover</label><textarea id="topic"></textarea>
+
+  <div class="box">
+    <h2>진행자의 기본 질문 <span class="en">Core questions for every guest</span></h2>
+    <div class="sub">답변을 적을 필요는 없습니다. 인터뷰 전에 가볍게 생각해 보실 수 있는 참고용입니다. / No need to write answers. These are just a reference to think about before the interview.</div>
+    <ol class="flow" id="coreList"></ol>
+    <div id="customBox" class="hidden" style="margin-top:22px">
+      <h2 id="customTitle"></h2>
+      <ol class="flow" id="customList"></ol>
+      <div class="sub">대략적인 가이드이며, 대화 흐름에 따라 달라질 수 있습니다. / A rough guide only; the conversation may flow differently.</div>
+    </div>
+    <div style="margin-top:16px"><button type="button" class="ghost" id="pdfBtn">PDF로 질문 저장 / Download questions (PDF)</button> <span class="sub" id="pdfMsg"></span></div>
+  </div>
+
+  <label>내가 받고 싶은 질문 / Questions I’d like to be asked</label>
+  <div id="myQs"></div><button class="ghost" id="addQ" type="button">+ 질문 추가 / Add question</button>
+  <label>꺼내고 싶은 주제 / Topics I’d like to bring up</label>
+  <div id="myTopics"></div><button class="ghost" id="addT" type="button">+ 주제 추가 / Add topic</button>
+  <label for="avoid">피하고 싶은 주제 / Topics to avoid</label><textarea id="avoid" style="min-height:60px"></textarea>
+  <label for="extra">기타 전달 사항 / Anything else</label><textarea id="extra" style="min-height:60px"></textarea>
+  <input type="text" id="gotcha" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px" aria-hidden="true">
+  <div style="margin-top:20px"><button id="submitBtn" type="button">제출 / Submit</button></div>
+  <div class="err" id="err" role="alert"></div>
+</section>
+
+<section id="done" class="hidden">
+  <h2>감사합니다! <span class="en">Thank you!</span></h2>
+  <p id="doneMsg"></p>
+  <div id="fallback" class="hidden">
+    <p class="sub">호스트 이메일 / Host email: <b id="hostMail"></b></p>
+    <textarea id="ansOut" class="mono" readonly style="min-height:170px"></textarea>
+    <div style="margin-top:8px"><button type="button" id="copyBtn">내용 복사 / Copy answers</button> <span class="sub" id="copyMsg"></span></div>
+  </div>
+</section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+// ====== SET THESE TWO ======
+const FORM_ENDPOINT="https://formspree.io/f/xaeqzarw";   // from formspree.io (see setup steps)
+const HOST_EMAIL="Jakin.choi@gmail.com";
+// ===========================
+const $=id=>document.getElementById(id);
+const FLOW=[["오프닝 · 자기소개","Opening and introduction: who you are and what you do."],["배경과 여정","Background and journey: how you got here, turning points."],["핵심 주제 깊이 보기","Deep dive: the main topic we agree on beforehand."],["게스트의 질문과 주제","Your own questions and topics (add them below)."],["청취자를 위한 조언 · 마무리","Advice for listeners and closing."]];
+const CORE=[["간단한 자기소개와 현재 하시는 일을 말씀해 주세요.","Introduce yourself and what you do now."],["지금의 일을 하게 된 계기는 무엇이었나요?","What led you to this path?"],["가장 큰 실패나 전환점, 그리고 거기서 배운 것은?","Your biggest failure or turning point, and what you learned."],["오늘의 주제에 대한 당신만의 관점은 무엇인가요?","What is your own perspective on today’s topic?"],["이 분야에서 사람들이 가장 많이 오해하는 것은?","What do people most often get wrong in your field?"],["청취자가 오늘 바로 실천할 수 있는 조언 한 가지는?","One piece of advice listeners can act on today."],["앞으로의 계획과 알리고 싶은 소식이 있나요?","What’s next, and what would you like to share?"]];
+const TERMS=[
+["녹음 및 촬영 / Recording","게스트는 인터뷰의 음성·영상 녹음 및 촬영에 동의합니다.","The Guest consents to audio and video recording of the interview."],
+["저작권 / Copyright","인터뷰 녹화물 및 편집된 에피소드 전체의 저작권은 Jakin’s Podcast(“진행자”)에 귀속됩니다. 게스트가 이전부터 보유한 자료와 지식재산은 게스트에게 남습니다.","Copyright in the recording and the finished episode as a whole belongs to Jakin’s Podcast (the “Host”). The Guest keeps ownership of pre-existing materials and intellectual property."],
+["이용 허락 / License","게스트는 진행자에게 인터뷰 내용, 이름, 사진, 음성, 초상을 YouTube, 웹사이트, SNS, 홍보물 등에서 편집·게시·배포·홍보할 수 있는 비독점적·전세계적·영구적 권리를 부여합니다.","The Guest grants the Host a non-exclusive, worldwide, perpetual license to edit, publish, distribute and promote the interview and the Guest’s name, voice, image and likeness on YouTube, the website, social media and promotional material."],
+["편집권 / Editorial control","진행자는 길이, 명확성, 법적·윤리적 사유로 내용을 편집하거나 일부를 게시하지 않을 수 있습니다.","The Host may edit for length, clarity, or legal and ethical reasons, and may decline to publish any part."],
+["게스트의 진술 / Guest statements","게스트는 허위·명예훼손적이거나 타인의 권리를 침해하는 내용을 의도적으로 말하지 않으며, 본인의 발언에 대한 책임은 게스트에게 있습니다. 비밀유지 의무를 위반하는 정보는 공개하지 않습니다.","The Guest will not knowingly make false, defamatory or rights-infringing statements, remains responsible for their own statements, and will not disclose information they are bound to keep confidential."],
+["제출한 질문과 주제 / Submitted material","설문에 제출한 질문·주제는 에피소드 기획과 방송에 사용될 수 있습니다.","Questions and topics submitted in this survey may be used to plan and produce the episode."],
+["보수 / Compensation","별도의 서면 합의가 없는 한 출연에 대한 보수는 지급되지 않습니다.","Unless agreed in writing, the Guest is not paid for appearing."],
+["철회 / Withdrawal","게스트는 에피소드가 공개되기 전에 서면으로 출연 철회를 요청할 수 있습니다. 이미 공개된 콘텐츠의 삭제는 합리적인 범위에서 협의합니다.","The Guest may withdraw in writing before publication. Removal of already published content will be discussed in good faith."],
+["개인정보 / Privacy","설문에 입력한 연락처와 정보는 에피소드 기획과 연락 목적으로만 사용합니다.","Contact details and answers are used only for episode planning and communication."],
+["준거법 / Governing law","본 약관은 대한민국 법률을 따릅니다.","These terms are governed by the laws of the Republic of Korea."]];
+
+// --- link codec (same as host.html) ---
+const fromB64u=s=>{s=s.replace(/-/g,"+").replace(/_/g,"/");while(s.length%4)s+="=";const b=atob(s),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u};
+async function pipe(u8,st){return new Uint8Array(await new Response(new Blob([u8]).stream().pipeThrough(st)).arrayBuffer())}
+async function decode(s){const u=fromB64u(s.slice(1));const raw=s[0]==="z"?await pipe(u,new DecompressionStream("deflate-raw")):u;return JSON.parse(new TextDecoder().decode(raw))}
+
+function li(parent,kr,en){const l=document.createElement("li"),b=document.createElement("b");b.textContent=kr;l.append(b);if(en){const s=document.createElement("span");s.className="en";s.textContent=en;l.append(s)}parent.append(l)}
+FLOW.forEach(f=>li($("flow"),f[0],f[1]));
+CORE.forEach(f=>li($("coreList"),f[0],f[1]));
+TERMS.forEach((t,i)=>{const p=document.createElement("p"),b=document.createElement("b"),s=document.createElement("span");b.textContent=(i+1)+". "+t[0]+". ";s.className="en";s.textContent=t[2];p.append(b,t[1],s);$("terms").append(p)});
+
+let guest={n:"",q:[]},agreedAt=null;
+(async()=>{const P=new URLSearchParams(location.search),c=P.get("g"),slug=P.get("guest");if(!c&&!slug)return;
+  try{let o;if(slug){const r=await fetch("guests.json?t="+Date.now());o=(await r.json())[slug]}else o=await decode(c);if(!o||!Array.isArray(o.q))throw 0;guest={n:String(o.n||""),q:o.q.map(String)};
+    guest.q.forEach(q=>li($("customList"),q));
+    if(guest.q.length){$("customTitle").textContent=(guest.n?guest.n+"님을 위한 ":"")+"맞춤 질문 / Questions prepared for you";$("customBox").classList.remove("hidden")}
+    if(guest.n)$("welcome").textContent=guest.n+"님, 환영합니다 / Welcome, "+guest.n;
+  }catch(e){$("linkErr").textContent="링크를 읽지 못했습니다. 호스트에게 문의해 주세요. / We couldn’t read this link. Please contact the host."}})();
+
+function addRow(boxId,ph){const r=document.createElement("div");r.className="row";const i=document.createElement("input");i.type="text";i.placeholder=ph;const x=document.createElement("button");x.type="button";x.className="ghost";x.textContent="×";x.setAttribute("aria-label","remove");x.onclick=()=>r.remove();r.append(i,x);$(boxId).append(r)}
+$("addQ").onclick=()=>addRow("myQs","질문 / Question");$("addT").onclick=()=>addRow("myTopics","주제 / Topic");
+addRow("myQs","질문 / Question");addRow("myTopics","주제 / Topic");
+const vals=id=>[...document.querySelectorAll("#"+id+" input")].map(i=>i.value.trim()).filter(Boolean);
+
+$("agree").onchange=()=>{$("goBtn").disabled=!$("agree").checked};
+$("goBtn").onclick=()=>{if(!$("agree").checked)return;agreedAt=new Date().toISOString();
+  const s=$("survey");s.classList.remove("locked");$("lockNote").textContent="";
+  $("agree").disabled=true;$("goBtn").disabled=true;$("goBtn").textContent="✓ 동의 완료 / Accepted";s.scrollIntoView({behavior:"smooth"})};
+
+$("submitBtn").onclick=async()=>{
+  if(!agreedAt){$("err").textContent="먼저 약관에 동의해 주세요. / Please accept the terms first.";return}
+  const name=$("name").value.trim(),email=$("email").value.trim();
+  if(!name||!/^\S+@\S+\.\S+$/.test(email)){$("err").textContent="성함과 올바른 이메일을 입력해 주세요. / Please enter your name and a valid email.";return}
+  $("err").textContent="";$("submitBtn").disabled=true;
+  const mq=vals("myQs"),mt=vals("myTopics");
+  const data={_subject:"[Podcast] Guest survey: "+name,_replyto:email,_gotcha:$("gotcha").value,name,email,
+    invited_as:guest.n,terms_accepted_at:agreedAt,terms_version:"v1",bio:$("bio").value.trim(),links:$("links").value.trim(),
+    main_topic:$("topic").value.trim(),my_questions:mq.map(x=>"- "+x).join("\n"),my_topics:mt.map(x=>"- "+x).join("\n"),
+    avoid:$("avoid").value.trim(),extra:$("extra").value.trim()};
+  const text=Object.entries(data).filter(e=>e[0][0]!=="_").map(e=>e[0]+": "+e[1]).join("\n");
+  let ok=false;
+  try{if(FORM_ENDPOINT.includes("YOUR_FORM_ID"))throw new Error("not configured");
+    const r=await fetch(FORM_ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json","Accept":"application/json"},body:JSON.stringify(data)});ok=r.ok}catch(e){ok=false}
+  ["guide","termsBox","survey"].forEach(i=>$(i).classList.add("hidden"));
+  $("done").classList.remove("hidden");window.scrollTo(0,0);
+  if(ok){$("doneMsg").textContent="응답이 호스트에게 전달되었습니다. 곧 연락드리겠습니다. / Your answers were sent to the host. We’ll be in touch soon."}
+  else{$("doneMsg").textContent="전송에 실패했습니다. 아래 내용을 복사해 호스트에게 이메일이나 메신저로 보내 주세요. / Sending failed. Please copy the text below and send it to the host by email or messenger.";
+    $("hostMail").textContent=HOST_EMAIL;$("ansOut").value=text;$("fallback").classList.remove("hidden")}
+};
+$("copyBtn").onclick=async()=>{const t=$("ansOut");try{await navigator.clipboard.writeText(t.value);$("copyMsg").textContent="복사되었습니다 / Copied"}catch(e){t.select();document.execCommand("copy");$("copyMsg").textContent="복사되었습니다 / Copied"}};
+
+// --- PDF of the questions ---
+const FONT="'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif";
+const BASE="width:794px;box-sizing:border-box;padding:0 64px;background:#fff;color:#1D2B25;line-height:1.6;font-family:"+FONT+";";
+function el(tag,css,text){const e=document.createElement(tag);e.style.cssText=css;if(text!=null)e.textContent=text;return e}
+function qBlock(n,kr,en){const b=el("div",BASE+"padding-top:13px;padding-bottom:13px"),r=el("div","display:flex;gap:14px");r.append(el("div","flex:none;width:30px;height:30px;border-radius:15px;background:#F3EBD3;color:#7D6428;font-weight:700;font-size:14px;text-align:center;line-height:30px",String(n)));const t=el("div","flex:1");t.append(el("div","font-size:16px;font-weight:600",kr));if(en)t.append(el("div","font-size:13px;color:#5E6B64;margin-top:2px",en));r.append(t);b.append(r);return b}
+function heading(kr,en){const h=el("div",BASE+"padding-top:28px;padding-bottom:6px");h.append(el("div","font-family:'Noto Serif KR',Georgia,serif;font-size:21px;font-weight:700;color:#1F4A3A",kr),el("div","font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#A4863D;margin-top:2px;padding-bottom:8px;border-bottom:2px solid #A4863D",en));return h}
+function group(h,q){const w=el("div","width:794px;background:#fff");w.append(h,q);return w}
+$("pdfBtn").onclick=async()=>{
+  const msg=$("pdfMsg");msg.textContent="";
+  if(!window.jspdf||!window.html2canvas){msg.textContent="PDF 도구를 불러오지 못했습니다. / PDF tools failed to load.";return}
+  $("pdfBtn").disabled=true;msg.textContent="만드는 중… / Building…";
+  const stage=el("div","position:fixed;left:-10000px;top:0;width:794px");document.body.append(stage);
+  try{
+    const blocks=[],hd=el("div","width:794px;box-sizing:border-box;padding:46px 64px 38px;background:#1F4A3A;color:#FBF9F4;line-height:1.5;font-family:"+FONT);
+    hd.append(el("div","font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#D8BE78","Jakin’s Podcast"),el("div","font-family:'Noto Serif KR',Georgia,serif;font-size:32px;font-weight:700;margin-top:8px","인터뷰 가이드"),el("div","font-size:15px;color:#CFE0D7;margin-top:2px","Interview Guide"));
+    if(guest.n)hd.append(el("div","font-size:15px;margin-top:18px;color:#D8BE78","게스트 / Guest: "+guest.n));
+    blocks.push(hd,el("div",BASE+"padding-top:22px;padding-bottom:4px;font-size:14px;color:#5E6B64","편하게 대화하는 분위기입니다. 답변을 미리 적어 오실 필요는 없으며, 인터뷰 전에 가볍게 생각해 보시는 참고용입니다. / A relaxed conversation. No written answers needed; this is just a reference to think about beforehand."));
+    FLOW.forEach((f,i)=>{const q=qBlock(i+1,f[0],f[1]);blocks.push(i?q:group(heading("인터뷰 흐름","Interview flow"),q))});
+    CORE.forEach((f,i)=>{const q=qBlock(i+1,f[0],f[1]);blocks.push(i?q:group(heading("기본 질문","Core questions"),q))});
+    guest.q.forEach((f,i)=>{const q=qBlock(i+1,f,"");blocks.push(i?q:group(heading((guest.n?guest.n+"님을 위한 ":"")+"맞춤 질문","Questions prepared for you"),q))});
+    blocks.push(el("div",BASE+"padding-top:26px;padding-bottom:20px;font-size:13px;color:#5E6B64","대략적인 가이드이며, 대화 흐름에 따라 달라질 수 있습니다. / A rough guide only; the conversation may flow differently."));
+    blocks.forEach(b=>stage.append(b));
+    const pdf=new window.jspdf.jsPDF({unit:"mm",format:"a4"}),PW=210,PH=297,BOT=18;let y=0;
+    for(let i=0;i<blocks.length;i++){
+      const c=await html2canvas(blocks[i],{scale:2,backgroundColor:"#ffffff",logging:false}),h=c.height/c.width*PW;
+      if(i>0&&y+h>PH-BOT){pdf.addPage();y=14}
+      pdf.addImage(c.toDataURL("image/jpeg",0.92),"JPEG",0,y,PW,h);y+=h}
+    const n=pdf.getNumberOfPages();
+    for(let i=1;i<=n;i++){pdf.setPage(i);pdf.setFontSize(9);pdf.setTextColor(130);pdf.text(i+" / "+n,PW/2,PH-8,{align:"center"})}
+    pdf.save("interview-guide"+(guest.n?"-"+guest.n.replace(/\s+/g,"-"):"")+".pdf");msg.textContent="";
+  }catch(e){msg.textContent="PDF를 만들지 못했습니다. / Couldn’t create the PDF."}
+  finally{stage.remove();$("pdfBtn").disabled=false}
+};
+</script>
+</body>
+</html>

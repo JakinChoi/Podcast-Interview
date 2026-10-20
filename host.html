@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Host · 게스트 링크 만들기 / Guest link maker</title>
+<style>
+:root{--bg:#F3F0E8;--card:#FBF9F4;--ink:#1D2B25;--mute:#5E6B64;--green:#1F4A3A;--line:#D8D3C4;--gold:#A4863D;--on:#FBF9F4}
+@media (prefers-color-scheme:dark){:root{color-scheme:dark;--bg:#16261F;--card:#1D3128;--ink:#ECE8DC;--mute:#A5B1A9;--green:#6FA88F;--line:#2F473B;--on:#10201A}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 "Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif}
+main{max-width:760px;margin:0 auto;padding:28px 18px 64px}
+h1{font:600 26px/1.3 "Noto Serif KR",Georgia,serif;color:var(--green);margin:20px 0 4px}
+h2{font:600 19px/1.35 "Noto Serif KR",Georgia,serif;color:var(--green);margin:0 0 6px}
+.sub{color:var(--mute);font-size:14px}
+section{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:22px;margin:20px 0}
+label{display:block;font-weight:600;margin:14px 0 4px}
+input,textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
+textarea{min-height:170px;resize:vertical}
+button{font:inherit;font-weight:600;border-radius:8px;padding:10px 18px;border:1px solid var(--green);background:var(--green);color:var(--on);cursor:pointer}
+button.ghost{background:transparent;color:var(--green)}
+.row{display:flex;gap:8px;margin:10px 0;align-items:center;flex-wrap:wrap}
+.row input{flex:1;min-width:200px}
+ul{list-style:none;padding:0;margin:8px 0}
+li{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line)}
+.hidden{display:none}
+.err{color:#B0452F;font-size:14px}
+</style>
+</head>
+<body>
+<main>
+<h1>호스트 · 게스트 링크 만들기<br><span class="sub" style="font-family:inherit;font-weight:400">Host: Guest link maker</span></h1>
+<div class="sub">게스트 이름과 맞춤 질문만 입력하면 그 게스트 전용 링크가 만들어집니다. 나머지(가이드, 약관, 기본 질문)는 모든 게스트에게 동일합니다. / Enter a guest’s name and their own questions to get a link just for them. Everything else stays the same for all guests.</div>
+
+<section>
+  <label for="gName">게스트 이름 / Guest name</label><input id="gName" type="text">
+  <label for="gQs">맞춤 질문 (한 줄에 하나) / Tailored questions (one per line)</label><textarea id="gQs"></textarea>
+  <div class="row"><button id="mk" type="button">링크 만들기 / Create link</button><span class="err" id="err"></span></div>
+  <div id="out" class="hidden">
+    <label for="link">게스트에게 보낼 링크 / Link to send</label>
+    <div class="row"><input id="link" type="text" readonly><button id="copy" type="button">복사 / Copy</button><button class="ghost" id="open" type="button">열어보기 / Open</button></div>
+    <div class="sub" id="msg"></div>
+  </div>
+</section>
+
+<section>
+  <h2>짧은 링크 / Short link</h2>
+  <div class="sub">위에 입력한 이름·질문으로 <b>index.html?guest=이름</b> 같은 짧은 링크를 만듭니다. 질문을 고치고 다시 누르면 같은 링크가 그대로 유지됩니다. / Uses the name and questions above to make a short link like index.html?guest=name. Edit the questions and press again: the link stays the same.</div>
+  <details style="margin-top:10px"><summary style="cursor:pointer;font-weight:600;color:var(--green)">GitHub 연결 설정 (한 번만) / GitHub connection (one-time)</summary>
+    <div class="row"><input id="ghO" placeholder="GitHub 사용자명 / username"><input id="ghR" placeholder="저장소 이름 / repository"></div>
+    <div class="row"><input id="ghB" placeholder="브랜치 / branch (main)"><input id="ghT" type="password" placeholder="액세스 토큰 / access token"></div>
+    <div class="row"><button class="ghost" id="ghSave" type="button">저장 / Save</button><span class="sub" id="ghMsg"></span></div>
+    <div class="sub">토큰은 이 브라우저에만 저장되며 GitHub 외에는 어디로도 전송되지 않습니다. / The token stays in this browser and is only sent to GitHub.</div>
+  </details>
+  <label for="slug">링크 이름 (영문·숫자·-) / Link name (a-z, 0-9, -)</label><input id="slug" type="text" placeholder="비워두면 자동 생성 / leave empty to auto-generate">
+  <div class="row"><button id="mkShort" type="button">짧은 링크 만들기·업데이트 / Create or update short link</button><span class="err" id="serr"></span></div>
+  <div id="sout" class="hidden">
+    <label for="slink">게스트에게 보낼 짧은 링크 / Short link to send</label>
+    <div class="row"><input id="slink" type="text" readonly><button id="scopy" type="button">복사 / Copy</button></div>
+    <div class="sub">GitHub 반영까지 1~2분 걸릴 수 있습니다. 링크를 보내기 전에 열어서 확인해 주세요. / It can take 1–2 minutes to go live. Open it to check before sending.</div>
+  </div>
+  <h2 style="margin-top:22px">저장된 짧은 링크 / Saved short links</h2>
+  <ul id="slist"></ul><button class="ghost" id="srefresh" type="button">새로고침 / Refresh</button>
+</section>
+
+<section>
+  <h2>저장된 게스트 / Saved guests</h2>
+  <div class="sub">이 브라우저에만 저장됩니다. 클릭하면 편집기로 불러옵니다. 질문을 고친 뒤 링크를 다시 만들면 새 링크가 생성되며, 이전 링크는 이전 질문을 그대로 보여줍니다. / Saved in this browser only. Click to load into the editor. After editing, creating the link again makes a new link; the old link keeps showing the old questions.</div>
+  <ul id="saved"></ul>
+</section>
+
+<section>
+  <h2>링크로 불러오기 / Load from a link</h2>
+  <div class="row"><input id="paste" type="text" placeholder="https://…/index.html?g=…"><button class="ghost" id="loadLink" type="button">불러오기 / Load</button></div>
+</section>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const b64u=u=>{let s="";for(let i=0;i<u.length;i++)s+=String.fromCharCode(u[i]);return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"")};
+const fromB64u=s=>{s=s.replace(/-/g,"+").replace(/_/g,"/");while(s.length%4)s+="=";const b=atob(s),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u};
+async function pipe(u8,st){return new Uint8Array(await new Response(new Blob([u8]).stream().pipeThrough(st)).arrayBuffer())}
+async function encode(o){const raw=new TextEncoder().encode(JSON.stringify(o));
+  if(window.CompressionStream){try{return "z"+b64u(await pipe(raw,new CompressionStream("deflate-raw")))}catch(e){}}
+  return "p"+b64u(raw)}
+async function decode(s){const u=fromB64u(s.slice(1));const raw=s[0]==="z"?await pipe(u,new DecompressionStream("deflate-raw")):u;return JSON.parse(new TextDecoder().decode(raw))}
+
+let saved=[];
+try{saved=JSON.parse(localStorage.getItem("guests")||"[]")}catch(e){}
+const persist=()=>{try{localStorage.setItem("guests",JSON.stringify(saved))}catch(e){}};
+function renderSaved(){const ul=$("saved");ul.textContent="";
+  if(!saved.length){const l=document.createElement("li");l.textContent="아직 없음 / None yet";ul.append(l);return}
+  saved.forEach((g,i)=>{const l=document.createElement("li"),b=document.createElement("button");
+    b.className="ghost";b.textContent=(g.n||"(이름 없음)")+" · "+g.q.length+"개 / "+g.q.length+" Q";
+    b.onclick=()=>{$("gName").value=g.n;$("gQs").value=g.q.join("\n");$("out").classList.add("hidden");window.scrollTo(0,0)};
+    const x=document.createElement("button");x.className="ghost";x.textContent="삭제 / Delete";
+    x.onclick=()=>{saved.splice(i,1);persist();renderSaved()};l.append(b,x);ul.append(l)})}
+renderSaved();
+
+$("mk").onclick=async()=>{
+  $("err").textContent="";
+  const n=$("gName").value.trim(),q=$("gQs").value.split("\n").map(s=>s.trim()).filter(Boolean);
+  if(!n&&!q.length){$("err").textContent="이름이나 질문을 입력해 주세요. / Enter a name or questions.";return}
+  const code=await encode({n,q});
+  const url=new URL("index.html",location.href);url.search="?g="+code;
+  $("link").value=url.href;$("out").classList.remove("hidden");
+  $("msg").textContent="링크 길이 / Link length: "+url.href.length+" characters";
+  const i=saved.findIndex(g=>g.n===n&&n);const rec={n,q};
+  if(i>=0)saved[i]=rec;else saved.unshift(rec);persist();renderSaved();
+};
+$("copy").onclick=async()=>{const t=$("link");try{await navigator.clipboard.writeText(t.value)}catch(e){t.select();document.execCommand("copy")}$("msg").textContent="복사되었습니다 / Copied"};
+$("open").onclick=()=>window.open($("link").value,"_blank");
+$("loadLink").onclick=async()=>{
+  try{const c=new URL($("paste").value.trim()).searchParams.get("g");const o=await decode(c);
+    $("gName").value=o.n||"";$("gQs").value=o.q.join("\n");$("err").textContent="";window.scrollTo(0,0)}
+  catch(e){$("err").textContent="링크를 읽지 못했습니다. / Couldn’t read that link.";window.scrollTo(0,0)}};
+
+// ---- short links via GitHub ----
+let gh={o:"",r:"",b:"main",t:""};
+try{gh={...gh,...JSON.parse(localStorage.getItem("gh")||"{}")}}catch(e){}
+if(!gh.o&&location.hostname.endsWith(".github.io")){gh.o=location.hostname.split(".")[0];gh.r=location.pathname.split("/")[1]||""}
+const ghFill=()=>["O","R","B","T"].forEach(k=>$("gh"+k).value=gh[k.toLowerCase()]);ghFill();
+$("ghSave").onclick=()=>{gh={o:$("ghO").value.trim(),r:$("ghR").value.trim(),b:$("ghB").value.trim()||"main",t:$("ghT").value.trim()};
+  try{localStorage.setItem("gh",JSON.stringify(gh))}catch(e){}$("ghMsg").textContent="저장됨 / Saved";loadShort()};
+const api=()=>"https://api.github.com/repos/"+gh.o+"/"+gh.r+"/contents/guests.json";
+const hdr=()=>({"Authorization":"Bearer "+gh.t,"Accept":"application/vnd.github+json"});
+const toB64=s=>{const u=new TextEncoder().encode(s);let x="";for(let i=0;i<u.length;i++)x+=String.fromCharCode(u[i]);return btoa(x)};
+const fromB64=c=>new TextDecoder().decode(Uint8Array.from(atob(c.replace(/\s/g,"")),ch=>ch.charCodeAt(0)));
+async function readGuests(){
+  if(!gh.o||!gh.r||!gh.t)throw new Error("GitHub 연결 설정이 필요합니다 / GitHub connection setup needed");
+  const r=await fetch(api()+"?ref="+encodeURIComponent(gh.b)+"&t="+Date.now(),{headers:hdr(),cache:"no-store"});
+  if(r.status===404)return{data:{},sha:null};
+  if(!r.ok)throw new Error("GitHub "+r.status+" (토큰·저장소 이름 확인 / check token and repo name)");
+  const j=await r.json();return{data:JSON.parse(fromB64(j.content)),sha:j.sha}}
+async function writeGuests(data,sha,msg){
+  const body={message:msg,content:toB64(JSON.stringify(data,null,2)),branch:gh.b};if(sha)body.sha=sha;
+  const r=await fetch(api(),{method:"PUT",headers:{...hdr(),"Content-Type":"application/json"},body:JSON.stringify(body)});
+  if(!r.ok)throw new Error("GitHub "+r.status+": "+(await r.text()).slice(0,140))}
+const shortUrl=slug=>{const u=new URL("index.html",location.href);u.search="?guest="+slug;return u.href};
+
+$("mkShort").onclick=async()=>{
+  $("serr").textContent="";
+  const n=$("gName").value.trim(),q=$("gQs").value.split("\n").map(x=>x.trim()).filter(Boolean);
+  if(!n&&!q.length){$("serr").textContent="이름이나 질문을 입력해 주세요. / Enter a name or questions.";return}
+  let slug=$("slug").value.trim().toLowerCase();
+  if(!slug){slug=n.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"guest";slug+="-"+Math.random().toString(36).slice(2,6);$("slug").value=slug}
+  if(!/^[a-z0-9-]{1,40}$/.test(slug)){$("serr").textContent="링크 이름은 영문 소문자·숫자·- 만 가능합니다. / Use only a-z, 0-9 and -.";return}
+  $("mkShort").disabled=true;
+  try{const {data,sha}=await readGuests();data[slug]={n,q};await writeGuests(data,sha,"Update guest "+slug);
+    $("slink").value=shortUrl(slug);$("sout").classList.remove("hidden");loadShort()}
+  catch(e){$("serr").textContent=e.message}
+  $("mkShort").disabled=false};
+$("scopy").onclick=async()=>{const t=$("slink");try{await navigator.clipboard.writeText(t.value)}catch(e){t.select();document.execCommand("copy")}};
+
+async function loadShort(){
+  const ul=$("slist");ul.textContent="";
+  try{const {data}=await readGuests();const keys=Object.keys(data);
+    if(!keys.length){const l=document.createElement("li");l.textContent="아직 없음 / None yet";ul.append(l);return}
+    keys.forEach(k=>{const g=data[k],l=document.createElement("li"),b=document.createElement("button");
+      b.className="ghost";b.textContent=k+" · "+(g.n||"")+" ("+g.q.length+")";
+      b.onclick=()=>{$("gName").value=g.n||"";$("gQs").value=g.q.join("\n");$("slug").value=k;$("slink").value=shortUrl(k);$("sout").classList.remove("hidden");window.scrollTo(0,0)};
+      const x=document.createElement("button");x.className="ghost";x.textContent="삭제 / Delete";
+      x.onclick=async()=>{if(!confirm(k+" 삭제? / Delete?"))return;try{const r=await readGuests();delete r.data[k];await writeGuests(r.data,r.sha,"Remove guest "+k);loadShort()}catch(e){$("serr").textContent=e.message}};
+      l.append(b,x);ul.append(l)})}
+  catch(e){const l=document.createElement("li");l.textContent=e.message;ul.append(l)}}
+$("srefresh").onclick=loadShort;
+if(gh.t)loadShort();else loadShort();
+</script>
+</body>
+</html>
