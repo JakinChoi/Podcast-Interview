@@ -31,6 +31,7 @@ button.ghost{background:transparent;color:var(--green)}
 button:disabled{opacity:.4;cursor:not-allowed}
 .row{display:flex;gap:8px;margin:8px 0}.row input{flex:1}
 .locked{opacity:.45;pointer-events:none;filter:grayscale(.4)}
+.ttl{font-weight:700;font-size:17px;text-decoration:underline;text-decoration-color:var(--gold);text-underline-offset:5px;margin:36px 0 4px}
 .hidden{display:none}
 .err{color:#B0452F;font-size:14px;min-height:20px;margin-top:8px}
 .box{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:16px;margin:22px 0 0}
@@ -74,7 +75,7 @@ button:disabled{opacity:.4;cursor:not-allowed}
     <ol class="flow" id="coreList"></ol>
     <div id="customBox" class="hidden" style="margin-top:22px">
       <h2 id="customTitle"></h2>
-      <ol class="flow" id="customList"></ol>
+      <div id="customList"></div>
       <div class="sub">대략적인 가이드이며, 대화 흐름에 따라 달라질 수 있습니다. / A rough guide only; the conversation may flow differently.</div>
     </div>
     <div style="margin-top:16px"><button type="button" class="ghost" id="pdfBtn">PDF로 질문 저장 / Download questions (PDF)</button> <span class="sub" id="pdfMsg"></span></div>
@@ -100,13 +101,14 @@ button:disabled{opacity:.4;cursor:not-allowed}
     <div style="margin-top:8px"><button type="button" id="copyBtn">내용 복사 / Copy answers</button> <span class="sub" id="copyMsg"></span></div>
   </div>
 </section>
+<div style="text-align:right;margin-top:30px;font-size:11px;color:var(--mute)">v2.1</div>
 </main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 // ====== SET THESE TWO ======
-const FORM_ENDPOINT="https://formspree.io/f/xaeqzarw";   // from formspree.io (see setup steps)
+const FORM_ENDPOINT="https://formspree.io/f/YOUR_FORM_ID";   // from formspree.io (see setup steps)
 const HOST_EMAIL="Jakin.choi@gmail.com";
 // ===========================
 const $=id=>document.getElementById(id);
@@ -135,9 +137,15 @@ CORE.forEach(f=>li($("coreList"),f[0],f[1]));
 TERMS.forEach((t,i)=>{const p=document.createElement("p"),b=document.createElement("b"),s=document.createElement("span");b.textContent=(i+1)+". "+t[0]+". ";s.className="en";s.textContent=t[2];p.append(b,t[1],s);$("terms").append(p)});
 
 let guest={n:"",q:[]},agreedAt=null;
+// A line wrapped in "quotes" (or starting with #) is a section title; numbering restarts after it.
+const parseQ=s=>{const m=s.match(/^[“"](.+)[”"]$/)||s.match(/^#\s*(.+)$/);return m?{t:1,x:m[1].trim()}:{t:0,x:s}};
+function renderTailored(){const box=$("customList");box.textContent="";let ol=null;
+  guest.q.forEach(s=>{const p=parseQ(s);
+    if(p.t){const d=document.createElement("div");d.className="ttl";d.textContent=p.x;box.append(d);ol=null}
+    else{if(!ol){ol=document.createElement("ol");ol.className="flow";ol.style.marginTop="6px";box.append(ol)}li(ol,p.x)}})}
 (async()=>{const P=new URLSearchParams(location.search),c=P.get("g"),slug=P.get("guest");if(!c&&!slug)return;
   try{let o;if(slug){const r=await fetch("guests.json?t="+Date.now());o=(await r.json())[slug]}else o=await decode(c);if(!o||!Array.isArray(o.q))throw 0;guest={n:String(o.n||""),q:o.q.map(String)};
-    guest.q.forEach(q=>li($("customList"),q));
+    renderTailored();
     if(guest.q.length){$("customTitle").textContent=(guest.n?guest.n+"님을 위한 ":"")+"맞춤 질문 / Questions prepared for you";$("customBox").classList.remove("hidden")}
     if(guest.n)$("welcome").textContent=guest.n+"님, 환영합니다 / Welcome, "+guest.n;
   }catch(e){$("linkErr").textContent="링크를 읽지 못했습니다. 호스트에게 문의해 주세요. / We couldn’t read this link. Please contact the host."}})();
@@ -193,7 +201,14 @@ $("pdfBtn").onclick=async()=>{
     blocks.push(hd,el("div",BASE+"padding-top:22px;padding-bottom:4px;font-size:14px;color:#5E6B64","편하게 대화하는 분위기입니다. 답변을 미리 적어 오실 필요는 없으며, 인터뷰 전에 가볍게 생각해 보시는 참고용입니다. / A relaxed conversation. No written answers needed; this is just a reference to think about beforehand."));
     FLOW.forEach((f,i)=>{const q=qBlock(i+1,f[0],f[1]);blocks.push(i?q:group(heading("인터뷰 흐름","Interview flow"),q))});
     CORE.forEach((f,i)=>{const q=qBlock(i+1,f[0],f[1]);blocks.push(i?q:group(heading("기본 질문","Core questions"),q))});
-    guest.q.forEach((f,i)=>{const q=qBlock(i+1,f,"");blocks.push(i?q:group(heading((guest.n?guest.n+"님을 위한 ":"")+"맞춤 질문","Questions prepared for you"),q))});
+    {let n=0,first=true,pend=null;const sec=(guest.n?guest.n+"님을 위한 ":"")+"맞춤 질문";
+    guest.q.map(parseQ).forEach(p=>{
+      if(p.t){n=0;pend=el("div",BASE+"padding-top:44px;padding-bottom:2px");pend.append(el("span","display:inline-block;font-size:16px;font-weight:700;color:#1F4A3A;border-bottom:2px solid #A4863D;padding-bottom:2px",p.x));return}
+      n++;let b=qBlock(n,p.x,"");
+      if(pend){const w=el("div","width:794px;background:#fff");w.append(pend,b);b=w;pend=null}
+      if(first){b=group(heading(sec,"Questions prepared for you"),b);first=false}
+      blocks.push(b)});
+    if(pend)blocks.push(pend)}
     blocks.push(el("div",BASE+"padding-top:26px;padding-bottom:20px;font-size:13px;color:#5E6B64","대략적인 가이드이며, 대화 흐름에 따라 달라질 수 있습니다. / A rough guide only; the conversation may flow differently."));
     blocks.forEach(b=>stage.append(b));
     const pdf=new window.jspdf.jsPDF({unit:"mm",format:"a4"}),PW=210,PH=297,BOT=18;let y=0;

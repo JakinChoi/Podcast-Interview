@@ -35,7 +35,9 @@ li{display:flex;gap:8px;align-items:center;justify-content:space-between;padding
 
 <section>
   <label for="gName">게스트 이름 / Guest name</label><input id="gName" type="text">
-  <label for="gQs">맞춤 질문 (한 줄에 하나) / Tailored questions (one per line)</label><textarea id="gQs"></textarea>
+  <label for="gQs">맞춤 질문 (한 줄에 하나) / Tailored questions (one per line)</label>
+  <div class="sub">제목을 만들려면 그 줄 전체를 큰따옴표로 감싸세요. 예: "창업 &amp; 사업 전략". 제목은 굵게·밑줄로 표시되고, 번호는 제목 다음부터 1번으로 다시 시작합니다. 줄 맨 앞에 #를 써도 됩니다. 제목에 "1."은 붙이지 마세요. / To make a section title, wrap the whole line in double quotes, e.g. "Startup &amp; strategy". Titles show bold and underlined, and numbering restarts at 1 after each title. A leading # works too. Don’t add “1.” to titles.</div>
+  <textarea id="gQs"></textarea>
   <div class="row"><button id="mk" type="button">링크 만들기 / Create link</button><span class="err" id="err"></span></div>
   <div id="out" class="hidden">
     <label for="link">게스트에게 보낼 링크 / Link to send</label>
